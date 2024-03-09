@@ -1,0 +1,70 @@
+-- 插入其他用户信息...
+-- 人流数据表（CrowdData）
+-- 记录每个摄像头检测到的人流量
+CREATE TABLE CrowdData (
+    EntryID INT PRIMARY KEY, -- 主键，唯一标识每条记录
+    Timestamp DATETIME, -- 时间戳，记录检测的时间
+    CameraID INT, -- 摄像头ID，标识哪个摄像头检测到的数据
+    DetectedCount INT, -- 检测到的人数，记录检测到的人数
+    Entrance VARCHAR(10) -- 入口/出口标识，表示是进入还是离开商场
+);
+
+-- 人脸数据表（FaceData）
+-- 存储从摄像头捕获的人脸数据
+CREATE TABLE FaceData (
+    FaceID INT PRIMARY KEY, -- 主键，唯一标识每张人脸
+    ImageCapture DATETIME, -- 图像捕获时间，记录图像被捕获的时间
+    CameraID INT, -- 摄像头ID，标识哪个摄像头捕获的图像
+    ImageData LONGBLOB, -- 图像数据，可能是一个链接或二进制数据
+    BoundingBox VARCHAR(30), -- 边界框坐标，表示人脸在图像中的位置
+    Confidence FLOAT -- 识别置信度，表示人脸识别的准确性
+);
+
+-- 顾客信息表（CustomerInfo）
+-- 包含已知顾客的个人信息
+CREATE TABLE CustomerInfo (
+    CustomerID INT PRIMARY KEY, -- 主键，唯一标识每个顾客
+    Name VARCHAR(100), -- 姓名，顾客的姓名
+    Gender VARCHAR(2), -- 性别，顾客的性别
+    AgeRange VARCHAR(10), -- 年龄范围，顾客的年龄范围
+    FaceID INT, -- 关联到FaceData表的外键，用于关联顾客的人脸数据
+    FOREIGN KEY (FaceID) REFERENCES FaceData(FaceID) -- 外键约束，确保FaceID与FaceData表中的主键关联
+);
+
+-- 摄像头位置表（CameraLocation）
+-- 描述每个摄像头的位置和区域
+CREATE TABLE CameraLocation (
+    CameraID INT PRIMARY KEY, -- 主键，唯一标识每个摄像头
+    Location VARCHAR(255), -- 位置描述，摄像头的具体位置
+    Area VARCHAR(255) -- 区域，如入口、出口、特定店铺前等
+);
+
+-- 行为日志表（BehaviorLog）
+-- 记录顾客在商场内的行为模式
+CREATE TABLE BehaviorLog (
+    BehaviorID INT PRIMARY KEY, -- 主键，唯一标识每条行为记录
+    CustomerID INT, -- 关联到CustomerInfo表的外键，用于关联顾客的信息
+    Timestamp DATETIME, -- 时间戳，记录行为发生的时间
+    Action VARCHAR(10), -- 行为类型，如购物、排队、休息等
+    Location VARCHAR(255) -- 行为发生的位置
+);
+
+-- 安全事件表（SecurityEvent）
+-- 记录任何安全相关的事件
+CREATE TABLE SecurityEvent (
+    EventID INT PRIMARY KEY, -- 主键，唯一标识每条安全事件记录
+    Timestamp DATETIME, -- 时间戳，记录事件发生的时间
+    Description VARCHAR(255), -- 事件描述，对事件的简要描述
+    CameraID INT, -- 关联到CameraLocation表的外键，用于关联摄像头的位置
+    FaceID INT -- 关联到FaceData表的外键，用于关联相关的人脸数据（如果有的话）
+);
+
+-- 排队信息表（QueueInfo）
+-- 记录排队信息
+CREATE TABLE QueueInfo (
+    QueueID INT PRIMARY KEY, -- 主键，唯一标识每条排队记录
+    Timestamp DATETIME, -- 时间戳，记录排队的时间
+    QueueLength INT, -- 排队长度，记录当前排队的人数
+    WaitTime FLOAT, -- 平均等待时间，记录顾客的平均等待时间
+    Location VARCHAR(255) -- 排队位置，表示排队发生的地点
+);
